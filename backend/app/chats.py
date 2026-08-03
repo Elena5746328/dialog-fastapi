@@ -11,7 +11,7 @@ from app.config import settings
 from app.database import Chat, Message, get_db, utc_now
 from app.polza import PolzaError, polza
 
-router = APIRouter(prefix="api", tags=["/chats"])
+router = APIRouter(prefix="/api", tags=["chats"])
 DbSession = Annotated[Session, Depends(get_db)]
 
 class ChatResponse(BaseModel):
