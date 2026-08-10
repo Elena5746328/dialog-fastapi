@@ -7,7 +7,7 @@ class PolzaError(Exception):
     pass
 
 class PolzaClient:
-    def __inti__(self) -> None:
+    def __init__(self) -> None:
         self.client = httpx.AsyncClient(
             base_url=settings.polza_api_base_url,
             timeout=settings.polza_timeout_seconds
@@ -57,7 +57,7 @@ class PolzaClient:
             response = await self.client.request(
                 method, path, headers=self.headers(), **kwargs
             )
-        except httpx.TimeoutExeption as exc:
+        except httpx.TimeoutException as exc:
             raise PolzaError("Polza.ai не ответил за отведенное время") from exc
         except httpx.HTTPError as exc:
             raise PolzaError("Не удалось подключиться к Polza.ai") from exc
