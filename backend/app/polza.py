@@ -4,7 +4,9 @@ from app.config import settings
 from typing import Any
 
 class PolzaError(Exception):
-    pass
+    def __init__(self, message, status_code: int = 502):
+        super().__init__(message)
+        self.status_code = status_code
 
 class PolzaClient:
     def __init__(self) -> None:
@@ -52,7 +54,7 @@ class PolzaClient:
 
         return content.strip()
 
-    async def _request(self, method: str, path: str, **kwargs: Any):
+    async def _request(self, method: str, path: str, **kwargs: Any) -> httpx.Response:
         try:
             response = await self.client.request(
                 method, path, headers=self.headers(), **kwargs
@@ -71,21 +73,21 @@ class PolzaClient:
             message = None
             raise PolzaError(message or "Polza.ai вернул ошибку")
 
-        @staticmethod
-        def _json(response: httpx.Response) -> dict[str, Any]:
-            try:
-                payload = response.json()
-            except ValueError as exc:
-                raise PolzaError("Polza.ai вернул некорректный ответ")
+    @staticmethod
+    def _json(response: httpx.Response) -> dict[str, Any]:
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise PolzaError("Polza.ai вернул некорректный ответ")
 
-            if not isinstance(payload, dict):
-                raise PolzaError("Polza.ai вернул ответ неизвестного формата")
+        if not isinstance(payload, dict):
+            raise PolzaError("Polza.ai вернул ответ неизвестного формата")
             
-            return payload
+        return payload
 
-        @staticmethod
-        def _is_chat_model(model: dict[str, Any]) -> bool:
-            endpoints = model.get("endpoints") or []
-            return model.get("type") == "chat" or "/v1/chat/completions" in endpoints
+    @staticmethod
+    def _is_chat_model(model: dict[str, Any]) -> bool:
+        endpoints = model.get("endpoints") or []
+        return model.get("type") == "chat" or "/v1/chat/completions" in endpoints
 
 polza = PolzaClient()
